@@ -1,3 +1,9 @@
 from django.shortcuts import render
 
-# Create your views here.
+def home(request):
+    """Домашняя страница каталога"""
+    return render(request, 'catalog/home.html')
+
+def contacts(request):
+    """Страница с контактной информацией"""
+    return render(request, 'catalog/contacts.html')
