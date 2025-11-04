@@ -1,0 +1,60 @@
+{% extends 'catalog/base.html' %}
+
+{% block title %}{{ product.name }} - Skystore{% endblock %}
+
+{% block content %}
+<!-- Хлебные крошки -->
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'home' %}">Главная</a></li>
+        <li class="breadcrumb-item active">{{ product.name }}</li>
+    </ol>
+</nav>
+
+<div class="row">
+    <!-- Изображение товара -->
+    <div class="col-md-6">
+        {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid rounded shadow">
+        {% else %}
+            <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 400px;">
+                <span class="text-muted">Изображение отсутствует</span>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Информация о товаре -->
+    <div class="col-md-6">
+        <h1 class="display-5 fw-bold">{{ product.name }}</h1>
+
+        {% if product.category %}
+            <span class="badge bg-primary mb-3 fs-6">{{ product.category.name }}</span>
+        {% endif %}
+
+        <h3 class="text-success mb-4">{{ product.price }} ₽</h3>
+
+        <div class="mb-4">
+            <h5>Описание:</h5>
+            <p class="fs-5">{{ product.description|default:"Описание отсутствует" }}</p>
+        </div>
+
+        <!-- Детали товара -->
+        <div class="card border-0 bg-light">
+            <div class="card-body">
+                <h6 class="card-title fw-bold">Детали товара:</h6>
+                <ul class="list-unstyled">
+                    <li><strong>Дата добавления:</strong> {{product.created_at|date:"d.m.Y H:i"}}</li>
+                    <li><strong>Последнее обновление:</strong> {{product.updated_at|date:"d.m.Y H:i"}}</li>
+                    <li><strong>Категория:</strong> {{product.category.name|default:"Не указана"}}</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Кнопки действий -->
+        <div class="mt-4">
+            <button class="btn btn-success btn-lg me-3">🛒 Добавить в корзину</button>
+            <a href="{% url 'home' %}" class="btn btn-outline-secondary">← Назад к каталогу</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
