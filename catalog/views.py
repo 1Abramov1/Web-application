@@ -1,21 +1,26 @@
-from django.shortcuts import render, get_object_or_404
-from .models import Product, Category
+from django.shortcuts import get_object_or_404
+from django.views.generic import ListView, DetailView, TemplateView
+from .models import Product
 
-def product_detail(request, pk):
-    """
-    Контроллер для отображения подробной информации о товаре.
-    Принимает pk товара и возвращает полную информацию.
-    """
-    product = get_object_or_404(Product, pk=pk)  # 🆕 ORM-запрос с обработкой 404
-    return render(request, 'catalog/product_detail.html', {'product': product})
 
-def home(request):
-    """
-    Контроллер главной страницы с списком товаров.
-    """
-    products = Product.objects.all()[:6]  # 🆕 ORM-запрос на получение продуктов
-    return render(request, 'catalog/home.html', {'products': products})
+class ProductDetailView(DetailView):
+    model = Product
+    template_name = 'catalog/product_detail.html'
+    context_object_name = 'product'
 
-def contacts(request):
-    """Контроллер страницы контактов."""
-    return render(request, 'catalog/contacts.html')
+    def get_object(self, queryset=None):
+        pk = self.kwargs.get('pk')
+        return get_object_or_404(Product, pk=pk)  # type: ignore
+
+
+class HomeListView(ListView):
+    model = Product
+    template_name = 'catalog/home.html'
+    context_object_name = 'products'
+
+    def get_queryset(self):
+        return Product.objects.all()[:6]  # type: ignore
+
+
+class ContactsTemplateView(TemplateView):
+    template_name = 'catalog/contacts.html'
