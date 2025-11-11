@@ -15,16 +15,21 @@
 - 🆕 Миграции БД - система управления схемой базы данных
 - 🆕 Детальные страницы товаров
 - 🆕 Динамическое отображение каталога
+- 🆕 Блог с CRUD операциями - полное управление записями
+- 🆕 Счетчик просмотров - автоматический учет просмотров статей
+- 🆕 Фильтрация записей - показ только опубликованных статей
+- 🆕 Умные перенаправления - после редактирования на просмотр статьи
 
 ## 🛠 Технологии
 
 - Backend: Django 5.2+
 - Frontend: Bootstrap 5.3
 - Язык: Python 3.11+
-- 🆕 База данных: PostgreSQL (ранее SQLite)
+- 🆕 База данных: PostgreSQL
 - 🆕 Pillow - обработка изображений
 - 🆕 psycopg2 - драйвер PostgreSQL
 - 🆕 python-dotenv - управление переменными окружения
+- 🆕 Class-Based Views (CBV) - для блога и каталога
 
 ## 📁 Структура проекта
 
@@ -46,11 +51,22 @@ Django/
 │   │   └── product_detail.html # 🆕 Страница товара
 │   ├── admin.py           # 🆕 Настройки админки
 │   ├── models.py          # 🆕 Модели данных
-│   ├── views.py
+│   ├── views.py           # 🆕 CBV контроллеры
+│   └── urls.py
+├── blog/                   # 🆕 Приложение блога
+│   ├── migrations/
+│   ├── templates/blog/
+│   │   ├── blogpost_list.html
+│   │   ├── blogpost_detail.html
+│   │   ├── blogpost_form.html
+│   │   └── blogpost_confirm_delete.html
+│   ├── admin.py
+│   ├── models.py          # 🆕 Модель BlogPost
+│   ├── views.py           # 🆕 CBV с кастомной логикой
 │   └── urls.py
 ├── config/                 # Настройки проекта
 │   ├── settings.py        # 🆕 Настройки PostgreSQL
-│   ├── urls.py            # 🆕 Маршруты для медиафайлов
+│   ├── urls.py            # 🆕 Маршруты для медиафайлов и блога
 │   └── ...
 ├── media/                 # 🆕 Папка для загружаемых файлов
 ├── .env                   # 🆕 Переменные окружения
@@ -71,6 +87,14 @@ Django/
 - `price` - цена товара
 - `created_at` - дата создания
 - `updated_at` - дата обновления
+
+### 🆕 BlogPost
+- `title` - заголовок статьи
+- `content` - содержимое статьи
+- `preview` - превью изображение
+- `created_at` - дата создания
+- `is_published` - признак публикации
+- `views_count` - количество просмотров
 
 ## ⚡️ Быстрый старт
 
@@ -99,19 +123,26 @@ python manage.py runserver
 · http://127.0.0.1:8000/contacts/ - Контакты
 · 🆕 http://127.0.0.1:8000/admin/ - Админ-панель
 · 🆕 http://127.0.0.1:8000/product/1/ - Страница товара
+· 🆕 http://127.0.0.1:8000/blog/ - Блог
 
 🆕 Команды управления
 # Заполнение тестовыми данными
 python manage.py fill_products
 
 # Создание фикстур
-python manage.py dumpdata catalog.Category --indent 2
+python manage.py dumpdata catalog.
+
+Александр antik, [12.11.2025 0:44]
+Category --indent 2
 
 # Загрузка фикстур
 python manage.py loaddata category.json product.json
 
 # Работа с shell
 python manage.py shell
+
+# 🆕 Создание приложения блога
+python manage.py startapp blog
 
 🎯 Маршруты
 
@@ -121,6 +152,19 @@ URL Описание
 🆕 /admin/ Админ-панель
 🆕 /media/ Медиафайлы
 🆕 /product/<int:pk>/ Страница товара
+🆕 /blog/ Список записей блога
+🆕 /blog/post/<int:pk>/ Детальная страница записи
+🆕 /blog/post/create/ Создание записи
+🆕 /blog/post/<int:pk>/update/ Редактирование записи
+🆕 /blog/post/<int:pk>/delete/ Удаление записи
+
+🆕 Особенности блога
+
+· Полный CRUD - создание, чтение, обновление, удаление
+· Счетчик просмотров - автоматически увеличивается при каждом просмотре
+· Фильтрация - показываются только опубликованные записи
+· Умные перенаправления - после редактирования переход на просмотр статьи
+· Class-Based Views - чистая архитектура на CBV
 
 🛡 Безопасность
 
