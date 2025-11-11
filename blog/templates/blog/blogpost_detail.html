@@ -1,6 +1,6 @@
 {% extends 'catalog/base.html' %}
 
-{% block title %}{{ post.title }} - Блог Skystore{% endblock %}
+{% block title %} {{post.title }} - Блог Skystore{% endblock %}
 
 {% block content %}
 <div class="container">
@@ -13,8 +13,11 @@
 
         <div class="post-meta mb-4">
             <span class="text-muted">
-                Опубликовано: {{ post.created_at|date:"d.m.Y H:i" }} |
-                Просмотров: {{ post.views_count }}
+                Опубликовано: {{post.created_at|date:"d.m.Y H:i" }} |
+            </span>
+            <span class="badge bg-info">
+                Просмотров:
+                <strong>{{post.views_count }}</strong>
             </span>
         </div>
 

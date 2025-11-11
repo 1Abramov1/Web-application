@@ -1,19 +1,22 @@
+from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import (
     ListView, DetailView, CreateView, UpdateView, DeleteView
 )
+from django.db.models import QuerySet
 from .models import BlogPost
 
 
 class BlogPostListView(ListView):
     """
     CBV для списка блоговых записей.
+    Выводит только статьи с положительным признаком публикации.
     """
     model = BlogPost
     template_name = 'blog/blogpost_list.html'
     context_object_name = 'posts'
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
         """
         Возвращает только опубликованные записи.
         """
@@ -22,7 +25,8 @@ class BlogPostListView(ListView):
 
 class BlogPostDetailView(DetailView):
     """
-    CBV для детального просмотра блоговой записи.
+    CBV для детального просмотра блоговой записи и
+    увеличения счетчика просмотров при каждом открытии.
     """
     model = BlogPost
     template_name = 'blog/blogpost_detail.html'
@@ -30,10 +34,11 @@ class BlogPostDetailView(DetailView):
 
     def get_object(self, queryset=None):
         """
-        Увеличивает счетчик просмотров при каждом просмотре.
+        Получает объект и увеличивает счетчик просмотров.
         """
         obj = super().get_object(queryset)
-        obj.increment_views()
+        obj.views_count += 1
+        obj.save(update_fields=['views_count'])
         return obj
 
 
@@ -50,12 +55,17 @@ class BlogPostCreateView(CreateView):
 class BlogPostUpdateView(UpdateView):
     """
     CBV для редактирования блоговой записи.
+    После успешного редактирования перенаправляет на просмотр статьи.
     """
     model = BlogPost
     template_name = 'blog/blogpost_form.html'
     fields = ['title', 'content', 'preview', 'is_published']
 
     def get_success_url(self):
+        """
+        Возвращает URL для перенаправления после успешного редактирования.
+        Перенаправляет на детальную страницу отредактированной записи.
+        """
         return reverse_lazy('blog:post_detail', kwargs={'pk': self.object.pk})
 
 

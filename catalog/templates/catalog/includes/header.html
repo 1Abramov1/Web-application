@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container">
-        <a class="navbar-brand" href="{% url 'home' %}">🛍️ Skystore</a>
+        <a class="navbar-brand" href="{% url 'home' %}">🛍 Skystore</a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
@@ -13,6 +13,10 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'contacts' %}">Контакты</a>
+                </li>
+                <!-- 🆕 Добавляем ссылку на блог -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'blog:post_list' %}">Блог</a>
                 </li>
             </ul>
         </div>
