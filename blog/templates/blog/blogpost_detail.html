@@ -1,0 +1,35 @@
+{% extends 'catalog/base.html' %}
+
+{% block title %} {{post.title }} - Блог Skystore{% endblock %}
+
+{% block content %}
+<div class="container">
+    <article>
+        <h1>{{ post.title }}</h1>
+
+        {% if post.preview %}
+        <img src="{{ post.preview.url }}" class="img-fluid mb-4" alt="{{ post.title }}">
+        {% endif %}
+
+        <div class="post-meta mb-4">
+            <span class="text-muted">
+                Опубликовано: {{post.created_at|date:"d.m.Y H:i" }} |
+            </span>
+            <span class="badge bg-info">
+                Просмотров:
+                <strong>{{post.views_count }}</strong>
+            </span>
+        </div>
+
+        <div class="post-content">
+            {{ post.content|linebreaks }}
+        </div>
+
+        <div class="mt-4">
+            <a href="{% url 'blog:post_list' %}" class="btn btn-secondary">Назад к списку</a>
+            <a href="{% url 'blog:post_update' post.pk %}" class="btn btn-warning">Редактировать</a>
+            <a href="{% url 'blog:post_delete' post.pk %}" class="btn btn-danger">Удалить</a>
+        </div>
+    </article>
+</div>
+{% endblock %}
