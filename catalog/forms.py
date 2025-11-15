@@ -1,6 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import Product
+from .models import Product, Category
 
 
 class ProductForm(forms.ModelForm):
@@ -15,14 +15,63 @@ class ProductForm(forms.ModelForm):
 
     class Meta:
         model = Product
-        fields = ['name', 'description', 'image', 'category', 'price']
+        fields = ['name', 'description', 'image', 'category', 'price', 'is_published']
         widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите название товара'}),
+            'description': forms.Textarea(
+                attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Опишите товар подробно'}),
             'image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
             'category': forms.Select(attrs={'class': 'form-control'}),
-            'price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'placeholder': '0.00'}),
+            'is_published': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
+        labels = {
+            'name': 'Название товара',
+            'description': 'Описание товара',
+            'image': 'Изображение товара',
+            'category': 'Категория',
+            'price': 'Цена (руб.)',
+            'is_published': 'Опубликовать товар',
+        }
+        help_texts = {
+            'name': 'Не используйте запрещенные слова в названии',
+            'description': 'Подробно опишите характеристики товара',
+            'price': 'Введите цену в рублях',
+            'is_published': 'Товар будет виден в каталоге только после публикации',
+        }
+
+    def __init__(self, *args, **kwargs):
+        """
+        Инициализация формы с дополнительной стилизацией.
+        """
+        super().__init__(*args, **kwargs)
+
+        # Стилизация всех полей
+        for field_name, field in self.fields.items():
+            # Для чекбокса добавляем особый класс
+            if isinstance(field.widget, forms.CheckboxInput):
+                field.widget.attrs['class'] = 'form-check-input'
+            # Для остальных полей добавляем стандартные классы
+            elif field_name != 'is_published':
+                if 'class' not in field.widget.attrs:
+                    field.widget.attrs['class'] = 'form-control'
+
+                # Добавляем дополнительные атрибуты в зависимости от типа поля
+                if field_name == 'name':
+                    field.widget.attrs['placeholder'] = 'Введите название товара'
+                elif field_name == 'description':
+                    field.widget.attrs['placeholder'] = 'Опишите товар подробно'
+                    field.widget.attrs['rows'] = 4
+                elif field_name == 'price':
+                    field.widget.attrs['placeholder'] = '0.00'
+                    field.widget.attrs['step'] = '0.01'
+                elif field_name == 'category':
+                    # Оптимизируем запрос для категорий
+                    field.queryset = Category.objects.all()
+
+            # Добавляем обязательную маркировку
+            if field.required:
+                field.widget.attrs['required'] = 'required'
 
     def clean_name(self):
         """
@@ -50,7 +99,7 @@ class ProductForm(forms.ModelForm):
                     f'Описание содержит запрещенное слово: "{word}"'
                 )
 
-        return self.cleaned_data['description']
+            return self.cleaned_data['description']
 
     def clean_price(self):
         """
