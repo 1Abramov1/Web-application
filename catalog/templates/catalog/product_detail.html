@@ -6,7 +6,7 @@
 <!-- Хлебные крошки -->
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{% url 'home' %}">Главная</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'catalog:home' %}">Главная</a></li>
         <li class="breadcrumb-item active">{{ product.name }}</li>
     </ol>
 </nav>
@@ -43,9 +43,9 @@
             <div class="card-body">
                 <h6 class="card-title fw-bold">Детали товара:</h6>
                 <ul class="list-unstyled">
-                    <li><strong>Дата добавления:</strong> {{product.created_at|date:"d.m.Y H:i"}}</li>
-                    <li><strong>Последнее обновление:</strong> {{product.updated_at|date:"d.m.Y H:i"}}</li>
-                    <li><strong>Категория:</strong> {{product.category.name|default:"Не указана"}}</li>
+                    <li><strong>Дата добавления:</strong> {{ product.created_at|date:"d.m.Y H:i" }}</li>
+                    <li><strong>Последнее обновление:</strong> {{ product.updated_at|date:"d.m.Y H:i" }}</li>
+                    <li><strong>Категория:</strong> {{ product.category.name|default:"Не указана" }}</li>
                 </ul>
             </div>
         </div>
@@ -53,7 +53,7 @@
         <!-- Кнопки действий -->
         <div class="mt-4">
             <button class="btn btn-success btn-lg me-3">🛒 Добавить в корзину</button>
-            <a href="{% url 'home' %}" class="btn btn-outline-secondary">← Назад к каталогу</a>
+            <a href="{% url 'catalog:home' %}" class="btn btn-outline-secondary">← Назад к каталогу</a>
         </div>
     </div>
 </div>
