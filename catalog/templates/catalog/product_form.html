@@ -1,0 +1,65 @@
+{% extends 'catalog/base.html' %}
+
+{% block title %}
+    {% if object %}Редактирование{% else %}Создание{% endif %} товара - Skystore
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h1 class="mb-4">{% if object %}Редактирование{% else %}Создание{% endif %} товара</h1>
+
+            <form method="post" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+
+                {% for field in form %}
+                <div class="mb-3">
+                    {% if field.field.widget.input_type == 'checkbox' %}
+                    <!-- 🆕 Специальная стилизация для чекбокса -->
+                    <div class="form-check">
+                        {{ field }}
+                        <label for="{{ field.id_for_label }}" class="form-check-label">
+                            {{ field.label }}
+                        </label>
+                        {% if field.help_text %}
+                        <div class="form-text">{{ field.help_text }}</div>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <!-- Стандартная стилизация для остальных полей -->
+                    <label for="{{ field.id_for_label }}" class="form-label">
+                        {{ field.label }}
+                        {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
+                    </label>
+
+                    {{ field }}
+
+                    {% if field.help_text %}
+                    <div class="form-text">{{ field.help_text }}</div>
+                    {% endif %}
+                    {% endif %}
+
+                    {% if field.errors %}
+                    <div class="alert alert-danger mt-2">
+                        {% for error in field.errors %}
+                        <div>{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                <div class="d-flex gap-2"><button type="submit" class="btn btn-success">
+                        {% if object %}Сохранить{% else %}Создать{% endif %}
+                    </button>
+                    <a href="{% if object %}{% url 'catalog:product_detail' object.pk %}{% else %}{% url 'catalog:product_list' %}{% endif %}"
+                       class="btn btn-secondary">
+                        Отмена
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
