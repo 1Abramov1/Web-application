@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
+
+from django.conf.global_settings import AUTH_USER_MODEL, AUTHENTICATION_BACKENDS
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -43,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'catalog', # Мое приложение
     'blog', # Мое приложение блог
+    'users', # Мое приложение пользователи
 ]
 
 MIDDLEWARE = [
@@ -135,3 +138,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Media files (uploads)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Указываем кастомную модель пользователя
+AUTH_USER_MODELS = 'users.User'
+
+# Настройки аутентификации
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
