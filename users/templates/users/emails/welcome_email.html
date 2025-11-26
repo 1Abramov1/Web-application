@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .footer {
+            text-align: center;
+            padding: 25px 20px;
+            font-size: 13px;
+            color: #6c757d;
+            background: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+        }
+        .welcome-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            display: block;
+        }
+        .features {
+            margin: 25px 0;
+            padding: 0;
+        }
+        .features li {
+            margin-bottom: 12px;
+            padding-left: 0;
+            list-style: none;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .features li:last-child {
+            border-bottom: none;
+        }
+        .cta-button {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .user-name {
+            color: #007bff;
+            font-weight: bold;
+        }
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                border-radius: 0;
+            }
+            .content {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <span class="welcome-icon">🎉</span>
+            <h1 style="margin: 0; font-size: 28px;">Добро пожаловать в Skystore!</h1>
+            <p style="margin: 10px 0 0; opacity: 0.9;">Ваш аккаунт успешно создан</p>
+        </div>
+
+        <div class="content">
+            <h2 style="color: #2c3e50; margin-top: 0;">Здравствуйте, <span class="user-name">{{ first_name }}</span>!</h2>
+
+            <p style="font-size: 16px;">Мы очень рады приветствовать вас в нашем интернет-магазине Skystore! Спасибо, что выбрали нас.</p>
+
+            <p><strong>Теперь вам доступны все возможности:</strong></p>
+            <ul class="features">
+                <li>🛍 <strong>Просматривайте товары</strong> - огромный ассортимент для каждого</li>
+                <li>⭐️ <strong>Добавляйте в избранное</strong> - сохраняйте понравившиеся товары</li>
+                <li>📝 <strong>Оставляйте отзывы</strong> - делитесь своим мнением</li>
+                <li>👤 <strong>Настройте профиль</strong> - персонализируйте свой аккаунт</li>
+                <li>🔔 <strong>Получайте уведомления</strong> - будьте в курсе новинок и акций</li>
+            </ul>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="http://127.0.0.1:8000/" class="cta-button">Начать покупки 🚀</a>
+            </div>
+
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 25px 0;">
+                <h3 style="color: #495057; margin-top: 0;">💡 Совет для новичка</h3>
+                <p style="margin: 0;">Заполните свой профиль полностью - это поможет нам предлагать вам наиболее подходящие товары!</p>
+            </div>
+
+            <p>Если у вас возникнут вопросы, наши специалисты всегда готовы помочь:</p>
+            <ul style="color: #6c757d;">
+                <li>📧 Email: support@skystore.com</li>
+                <li>📞 Телефон: +7 (999) 123-45-67</li>
+                <li>🕒 Время работы: 24/7</li>
+            </ul>
+
+            <p style="border-top: 2px solid #007bff; padding-top: 20px; margin-top: 30px;">
+                С уважением,<br>
+                <strong style="color: #007bff;">Команда Skystore</strong>
+            </p>
+        </div>
+
+        <div class="footer">
+            <p style="margin: 0 0 10px;">Это автоматическое сообщение, пожалуйста, не отвечайте на него.</p>
+            <p style="margin: 0;">
+                <a href="http://127.0.0.1:8000/" style="color: #6c757d; text-decoration: none;">Skystore</a>
+                | © 2025 Все права защищены.
+            </p>
+            <p style="margin: 10px 0 0; font-size: 11px; color: #adb5bd;">
+                Вы получили это письмо потому, что зарегистрировались в нашем магазине.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

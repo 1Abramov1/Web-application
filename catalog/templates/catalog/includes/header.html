@@ -20,12 +20,33 @@
                 </li>
                 <!-- 🆕 Ссылка на все товары -->
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'catalog:product_list' %}">🛍️ Все товары</a>
+                    <a class="nav-link" href="{% url 'catalog:product_list' %}">🛍 Все товары</a>
                 </li>
                 <!-- 🆕 Ссылка на добавление товара -->
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'catalog:product_create' %}">➕ Добавить товар</a>
                 </li>
+            </ul>
+
+            <!-- 🆕 Блок аутентификации -->
+            <ul class="navbar-nav ms-auto">
+                {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <form method="post" action="{% url 'users:logout' %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-light btn-sm">
+                            🚪 Выйти
+                        </button>
+                    </form>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'users:login' %}">🔑 Войти</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'users:register' %}">📝 Регистрация</a>
+                </li>
+                {% endif %}
             </ul>
         </div>
     </div>
