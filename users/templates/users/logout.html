@@ -1,10 +1,34 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'catalog/base.html' %}
+{% load static %}
 
-</body>
-</html>
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0">🚪 Выход из системы</h4>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <span style="font-size: 64px;">🔒</span>
+                    </div>
+
+                    <h5>Вы уверены, что хотите выйти?</h5>
+                    <p class="text-muted">После выхода вам нужно будет снова войти в систему для доступа к вашему аккаунту.</p>
+                    <form method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-lg">
+                            🚪 Да, выйти
+                        </button>
+                    </form>
+
+                    <a href="{% url 'catalog:home' %}" class="btn btn-secondary btn-lg">
+                        ↩️ Отмена
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

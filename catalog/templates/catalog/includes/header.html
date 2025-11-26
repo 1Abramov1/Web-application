@@ -32,10 +32,12 @@
             <ul class="navbar-nav ms-auto">
                 {% if user.is_authenticated %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'users:profile' %}">👤 Профиль</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'users:logout' %}">🚪 Выйти</a>
+                    <form method="post" action="{% url 'users:logout' %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-light btn-sm">
+                            🚪 Выйти
+                        </button>
+                    </form>
                 </li>
                 {% else %}
                 <li class="nav-item">

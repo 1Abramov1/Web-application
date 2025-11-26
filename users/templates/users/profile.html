@@ -1,10 +1,65 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'catalog/base.html' %}
+{% load static %}
 
-</body>
-</html>
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">👤 Профиль пользователя</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Аватар -->
+                        <div class="col-md-4 text-center">
+                            {% if user.avatar %}
+                                <img src="{{ user.avatar.url }}" alt="Аватар" class="img-fluid rounded-circle mb-3" style="max-width: 200px;">
+                            {% else %}
+                                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 200px; height: 200px;">
+                                    <span class="text-muted" style="font-size: 48px;">👤</span>
+                                </div>
+                            {% endif %}
+                            <h5>{{ user.get_full_name|default:user.email }}</h5>
+                            <p class="text-muted">{{ user.email }}</p>
+                        </div>
+
+                        <!-- Форма редактирования -->
+                        <div class="col-md-8">
+                            <form method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+
+                                {% for field in form %}
+                                <div class="mb-3">
+                                    <label for="{{ field.id_for_label }}" class="form-label">
+                                        {{ field.label }}
+                                    </label>
+                                    {{ field }}
+                                    {% if field.help_text %}
+                                        <div class="form-text">{{ field.help_text }}</div>
+                                    {% endif %}
+                                    {% if field.errors %}
+                                        <div class="alert alert-danger mt-1">
+                                            {{ field.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                    <button type="submit" class="btn btn-primary">
+                                        💾 Сохранить изменения
+                                    </button>
+                                    <a href="{% url 'catalog:home' %}" class="btn btn-secondary">
+                                        ↩️ Назад
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
