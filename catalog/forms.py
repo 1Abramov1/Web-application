@@ -16,6 +16,7 @@ class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         fields = ['name', 'description', 'image', 'category', 'price', 'is_published']
+        # 🆕 Поле owner НЕ включаем - оно устанавливается автоматически
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите название товара'}),
             'description': forms.Textarea(
@@ -99,7 +100,7 @@ class ProductForm(forms.ModelForm):
                     f'Описание содержит запрещенное слово: "{word}"'
                 )
 
-            return self.cleaned_data['description']
+        return self.cleaned_data['description']  # 🆕 Исправлено - добавлен return
 
     def clean_price(self):
         """

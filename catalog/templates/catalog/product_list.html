@@ -27,6 +27,21 @@
 
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">{{ product.name }}</h5>
+
+                    <!-- 🆕 Статус публикации и информация о владельце -->
+                    <div class="mb-2">
+                        <span class="badge {% if product.is_published %}bg-success{% else %}bg-secondary{% endif %} small">
+                            {% if product.is_published %}✅ Опубликован{% else %}🚫 Не опубликован{% endif %}
+                        </span>
+                        {% if product.owner %}
+                        <span class="badge bg-info small ms-1">👤 {{ product.owner.username }}</span>
+                        {% endif %}
+                        <!-- 🆕 Показываем если текущий пользователь - владелец -->
+                        {% if user == product.owner %}
+                        <span class="badge bg-warning small ms-1">⭐️ Ваш</span>
+                        {% endif %}
+                    </div>
+
                     <p class="card-text flex-grow-1">
                         {{ product.description|truncatewords:20 }}
                     </p>
@@ -35,9 +50,18 @@
                         <p class="text-success fw-bold fs-4 mb-2">{{ product.price }} ₽</p>
                         <div class="btn-group w-100">
                             <a href="{% url 'catalog:product_detail' product.pk %}" class="btn btn-primary">Подробнее</a>
+
+                            <!-- 🆕 Кнопки только для владельца ИЛИ модератора -->
                             {% if user.is_authenticated %}
+                                <!-- Редактирование только для владельца -->
+                                {% if user == product.owner %}
                                 <a href="{% url 'catalog:product_update' product.pk %}" class="btn btn-warning">✏️</a>
+                                {% endif %}
+
+                                <!-- Удаление для владельца ИЛИ модератора -->
+                                {% if user == product.owner or perms.catalog.delete_product %}
                                 <a href="{% url 'catalog:product_delete' product.pk %}" class="btn btn-danger">🗑</a>
+                                {% endif %}
                             {% endif %}
                         </div>
                     </div>
@@ -57,5 +81,53 @@
         </div>
         {% endfor %}
     </div>
+
+    <!-- 🆕 Информационная панель о правах -->
+    {% if user.is_authenticated %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-info">
+                <div class="card-header bg-info text-white">
+                    <strong>👤 Ваши права в системе</strong>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Создание продуктов:</h6>
+                            <ul class="list-unstyled">
+                                <li>✅ <strong>Все авторизованные пользователи</strong> могут создавать продукты</li>
+                                <li>✅ Продукт автоматически привязывается к вам как владельцу</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Редактирование и удаление:</h6>
+                            <ul class="list-unstyled">
+                                <li>✅ <strong>Владельцы</strong> могут редактировать и удалять свои продукты</li>
+                                <li>✅ <strong>Модераторы</strong> могут удалять любые продукты</li>
+                                <li>❌ <strong>Обычные пользователи</strong> не могут управлять чужими продуктами</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 🆕 Индикатор текущих прав -->
+                    <div class="mt-3 p-3 bg-light rounded">
+                        <strong>Ваши текущие права:</strong>
+                        <div class="mt-2">
+                            {% if user.is_authenticated %}
+                                <span class="badge bg-success">Создание продуктов</span>
+                            {% endif %}
+                            {% if perms.catalog.delete_product %}
+                                <span class="badge bg-danger">Удаление любых продуктов</span>
+                            {% endif %}
+                            {% if perms.catalog.can_unpublish_product %}
+                                <span class="badge bg-warning">Управление публикацией</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
