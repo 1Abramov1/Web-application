@@ -1,5 +1,6 @@
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import QuerySet
 from .models import Product
 from .forms import ProductForm
@@ -41,26 +42,34 @@ class ProductDetailView(DetailView):
     context_object_name = 'product'
 
 
-class ProductCreateView(CreateView):
+class ProductCreateView(LoginRequiredMixin, CreateView):
     """CBV для создания нового продукта."""
     model = Product
     form_class = ProductForm
     template_name = 'catalog/product_form.html'
     success_url = reverse_lazy('catalog:product_list')
 
+    # Опционально: настройка перенаправления для неавторизованных
+    login_url = '/users/login/'
+    redirect_field_name = 'next'
 
-class ProductUpdateView(UpdateView):
+
+class ProductUpdateView(LoginRequiredMixin, UpdateView):
     """CBV для редактирования продукта."""
     model = Product
     form_class = ProductForm
     template_name = 'catalog/product_form.html'
+    login_url = '/users/login/'
+    redirect_field_name = 'next'
 
     def get_success_url(self):
         return reverse_lazy('catalog:product_detail', kwargs={'pk': self.object.pk})
 
 
-class ProductDeleteView(DeleteView):
+class ProductDeleteView(LoginRequiredMixin, DeleteView):
     """CBV для удаления продукта."""
     model = Product
     template_name = 'catalog/product_confirm_delete.html'
     success_url = reverse_lazy('catalog:product_list')
+    login_url = '/users/login/'
+    redirect_field_name = 'next'
