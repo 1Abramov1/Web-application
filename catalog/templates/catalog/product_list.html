@@ -12,7 +12,23 @@
             </a>
         {% endif %}
     </div>
-
+<div class="alert alert-info mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <strong>📦 Всего товаров:</strong> {{ products.count }}
+            {% if user.is_superuser and CACHE_ENABLED %}
+            <span class="badge bg-success ms-2">Кэширование включено</span>
+            {% endif %}
+        </div>
+        {% if user.is_superuser %}
+        <div>
+            <small class="text-muted">
+                🔄 Данные обновляются каждые 15 минут
+            </small>
+        </div>
+        {% endif %}
+    </div>
+</div>
     <div class="row">
         {% for product in products %}
         <div class="col-lg-4 col-md-6 mb-4">

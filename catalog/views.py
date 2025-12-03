@@ -5,6 +5,13 @@ from django.contrib.auth.decorators import permission_required
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from django.db.models import QuerySet
+
+# 🆕 Импорты для кэширования
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
+from django.core.cache import cache
+from django.conf import settings
+
 from .models import Product
 from .forms import ProductForm
 
@@ -30,13 +37,38 @@ class ContactsTemplateView(TemplateView):
 
 
 class ProductListView(ListView):
-    """CBV для списка продуктов."""
+    """CBV для списка продуктов с низкоуровневым кэшированием."""
     model = Product
     template_name = 'catalog/product_list.html'
     context_object_name = 'products'
 
     def get_queryset(self):
-        return Product.objects.all()
+        # 🆕 Низкоуровневое кэширование списка продуктов
+        cache_key = 'product_list_all'
+
+        # Проверяем, включено ли кэширование в настройках
+        if not getattr(settings, 'CACHE_ENABLED', True):
+            return Product.objects.all()
+
+        # Пытаемся получить данные из кэша
+        products = cache.get(cache_key)
+
+        if products is None:
+            # Если нет в кэше, получаем из БД
+            products = Product.objects.all()
+
+            # Сохраняем в кэш на 15 минут (900 секунд)
+            cache.set(cache_key, products, timeout=900)
+
+            # 🆕 Логируем для отладки
+            if settings.DEBUG:
+                print("📦 Список продуктов загружен из БД и сохранен в кэш")
+        else:
+            # 🆕 Логируем для отладки
+            if settings.DEBUG:
+                print("📦 Список продуктов загружен из кэша")
+
+        return products
 
 
 class ProductDetailView(DetailView):
@@ -44,6 +76,11 @@ class ProductDetailView(DetailView):
     model = Product
     template_name = 'catalog/product_detail.html'
     context_object_name = 'product'
+
+    # 🆕 Кэшируем всю страницу на 5 минут (300 секунд)
+    @method_decorator(cache_page(300))
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
 
 
 class ProductCreateView(LoginRequiredMixin, CreateView):
@@ -59,6 +96,11 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
         """🆕 Автоматически устанавливаем владельца при создании"""
         form.instance.owner = self.request.user
         messages.success(self.request, '✅ Продукт успешно создан!')
+
+        # 🆕 Очищаем кэш списка продуктов при создании нового
+        if getattr(settings, 'CACHE_ENABLED', True):
+            cache.delete('product_list_all')
+
         return super().form_valid(form)
 
 
@@ -85,6 +127,15 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def form_valid(self, form):
         messages.success(self.request, '✅ Продукт успешно обновлен!')
+
+        # 🆕 Очищаем кэш продукта после обновления
+        cache_key = get_product_cache_key(self.object.pk)
+        cache.delete(cache_key)
+
+        # 🆕 Очищаем кэш списка продуктов
+        if getattr(settings, 'CACHE_ENABLED', True):
+            cache.delete('product_list_all')
+
         return super().form_valid(form)
 
 
@@ -122,7 +173,18 @@ class ProductDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     def delete(self, request, *args, **kwargs):
         """Добавляем сообщение об успешном удалении"""
+        product_id = self.kwargs.get('pk')
+
         messages.success(self.request, '✅ Продукт успешно удален!')
+
+        # 🆕 Очищаем кэш продукта после удаления
+        cache_key = get_product_cache_key(product_id)
+        cache.delete(cache_key)
+
+        # 🆕 Очищаем кэш списка продуктов
+        if getattr(settings, 'CACHE_ENABLED', True):
+            cache.delete('product_list_all')
+
         return super().delete(request, *args, **kwargs)
 
 
@@ -137,6 +199,14 @@ def unpublish_product(request, pk):
         product.is_published = False
         product.save()
         messages.success(request, f'✅ Публикация продукта "{product.name}" отменена!')
+
+        # 🆕 Очищаем кэш при изменении публикации
+        cache_key = get_product_cache_key(pk)
+        cache.delete(cache_key)
+
+        # 🆕 Очищаем кэш списка продуктов
+        if getattr(settings, 'CACHE_ENABLED', True):
+            cache.delete('product_list_all')
     else:
         messages.warning(request, f'ℹ️ Продукт "{product.name}" уже не опубликован')
 
@@ -152,6 +222,14 @@ def publish_product(request, pk):
         product.is_published = True
         product.save()
         messages.success(request, f'✅ Продукт "{product.name}" опубликован!')
+
+        # 🆕 Очищаем кэш при изменении публикации
+        cache_key = get_product_cache_key(pk)
+        cache.delete(cache_key)
+
+        # 🆕 Очищаем кэш списка продуктов
+        if getattr(settings, 'CACHE_ENABLED', True):
+            cache.delete('product_list_all')
     else:
         messages.warning(request, f'ℹ️ Продукт "{product.name}" уже опубликован')
 
@@ -169,4 +247,47 @@ def toggle_publish_status(request, pk):
     status = "опубликован" if product.is_published else "снят с публикации"
     messages.success(request, f'✅ Продукт "{product.name}" {status}!')
 
+    # 🆕 Очищаем кэш при изменении статуса
+    cache_key = get_product_cache_key(pk)
+    cache.delete(cache_key)
+
+    # 🆕 Очищаем кэш списка продуктов
+    if getattr(settings, 'CACHE_ENABLED', True):
+        cache.delete('product_list_all')
+
     return redirect('catalog:product_detail', pk=product.pk)
+
+
+# 🆕 Утилиты для кэширования
+
+def get_product_cache_key(product_id):
+    """Генерация ключа кэша для продукта"""
+    return f"product_detail_{product_id}"
+
+
+def clear_product_cache(product_id):
+    """Очистка кэша для продукта"""
+    cache_key = get_product_cache_key(product_id)
+    cache.delete(cache_key)
+
+
+def clear_product_list_cache():
+    """Очистка кэша списка продуктов"""
+    if getattr(settings, 'CACHE_ENABLED', True):
+        cache.delete('product_list_all')
+
+
+def get_cached_product_list():
+    """Получение списка продуктов из кэша или БД"""
+    cache_key = 'product_list_all'
+
+    if not getattr(settings, 'CACHE_ENABLED', True):
+        return Product.objects.all()
+
+    products = cache.get(cache_key)
+
+    if products is None:
+        products = Product.objects.all()
+        cache.set(cache_key, products, timeout=900)
+
+    return products

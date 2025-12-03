@@ -153,3 +153,23 @@ EMAIL_SUBJECT_PREFIX = '[Skystore] '  # Префикс для всех писе�
 LOGIN_URL = '/users/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+
+# Настройки Redis для кэширования
+# 🆕 Включение/выключение кэширования (для отладки)
+CACHE_ENABLED = True
+
+# Настройки Redis для кэширования
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+        "KEY_PREFIX": "skystore",
+        "TIMEOUT": 900,  # 15 минут по умолчанию
+    }
+}
+
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
