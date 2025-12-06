@@ -4,103 +4,196 @@
 
 {% block content %}
 <div class="container">
+    <!-- Заголовок и кнопка добавления -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Каталог товаров</h1>
+        <h1>🛍 Каталог товаров</h1>
         {% if user.is_authenticated %}
             <a href="{% url 'catalog:product_create' %}" class="btn btn-success">
                 ➕ Добавить товар
             </a>
         {% endif %}
     </div>
-<div class="alert alert-info mb-4">
-    <div class="d-flex justify-content-between align-items-center">
-        <div>
-            <strong>📦 Всего товаров:</strong> {{ products.count }}
-            {% if user.is_superuser and CACHE_ENABLED %}
-            <span class="badge bg-success ms-2">Кэширование включено</span>
-            {% endif %}
+
+    <!-- Информация о кэшировании -->
+    <div class="alert alert-info mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <strong>📦 Всего товаров:</strong> {{ products.paginator.count|default:products.count }}
+                {% if from_cache %}
+                <span class="badge bg-success ms-2">⚡️ Из кэша</span>
+                {% endif %}
+            </div>
         </div>
-        {% if user.is_superuser %}
-        <div>
-            <small class="text-muted">
-                🔄 Данные обновляются каждые 15 минут
-            </small>
-        </div>
-        {% endif %}
     </div>
-</div>
+
+    <!-- Категории для фильтрации -->
+    <div class="mb-4">
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'catalog:product_list' %}"
+               class="btn btn-outline-primary btn-sm {% if not request.GET.category %}active{% endif %}">
+                Все категории
+            </a>
+            {% for cat in categories|slice:":6" %}
+            <a href="{% url 'catalog:category_products' slug=cat.slug %}"
+               class="btn btn-outline-primary btn-sm {% if request.GET.category == cat.slug %}active{% endif %}">
+                {{ cat.name }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Список товаров -->
     <div class="row">
         {% for product in products %}
-        <div class="col-lg-4 col-md-6 mb-4">
+        <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
             <div class="card product-card h-100 shadow-sm">
+                <!-- Изображение товара -->
                 {% if product.image %}
-                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 250px; object-fit: cover;">
+                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}"
+                         style="height: 200px; object-fit: cover;">
                 {% else %}
-                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 250px;">
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center"
+                         style="height: 200px;">
                         <span class="text-muted">Нет изображения</span>
                     </div>
                 {% endif %}
 
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">{{ product.name }}</h5>
-
-                    <!-- 🆕 Статус публикации и информация о владельце -->
-                    <div class="mb-2">
-                        <span class="badge {% if product.is_published %}bg-success{% else %}bg-secondary{% endif %} small">
-                            {% if product.is_published %}✅ Опубликован{% else %}🚫 Не опубликован{% endif %}
-                        </span>
-                        {% if product.owner %}
-                        <span class="badge bg-info small ms-1">👤 {{ product.owner.username }}</span>
+                <!-- Бейджи статуса -->
+                <div class="card-img-overlay p-2">
+                    <div class="d-flex justify-content-between">
+                        {% if product.is_published %}
+                        <span class="badge bg-success">✅ Опубликован</span>
+                        {% else %}
+                        <span class="badge bg-secondary">🚫 Черновик</span>
                         {% endif %}
-                        <!-- 🆕 Показываем если текущий пользователь - владелец -->
-                        {% if user == product.owner %}
-                        <span class="badge bg-warning small ms-1">⭐️ Ваш</span>
+
+                        {% if product.category %}
+                        <span class="badge bg-primary">{{ product.category.name }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Тело карточки -->
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{ product.name|truncatechars:40 }}</h5>
+
+                    <!-- Информация о владельце -->
+                    <div class="mb-2">
+                        {% if product.owner %}
+                        <small class="text-muted">
+                            👤 {{ product.owner.username }}
+                            {% if user == product.owner %}
+                            <span class="badge bg-warning ms-1">Ваш</span>
+                            {% endif %}
+                        </small>
                         {% endif %}
                     </div>
 
-                    <p class="card-text flex-grow-1">
-                        {{ product.description|truncatewords:20 }}
+                    <!-- Описание -->
+                    <p class="card-text flex-grow-1 text-muted">
+                        {{ product.description|truncatechars:80|default:"Нет описания" }}
                     </p>
 
+                    <!-- Цена и кнопки -->
                     <div class="mt-auto">
                         <p class="text-success fw-bold fs-4 mb-2">{{ product.price }} ₽</p>
-                        <div class="btn-group w-100">
-                            <a href="{% url 'catalog:product_detail' product.pk %}" class="btn btn-primary">Подробнее</a>
 
-                            <!-- 🆕 Кнопки только для владельца ИЛИ модератора -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'catalog:product_detail' product.pk %}"
+                               class="btn btn-primary btn-sm">
+                                👁 Подробнее
+                            </a>
+
+                            <!-- Кнопки управления -->
                             {% if user.is_authenticated %}
-                                <!-- Редактирование только для владельца -->
+                            <div class="btn-group">
                                 {% if user == product.owner %}
-                                <a href="{% url 'catalog:product_update' product.pk %}" class="btn btn-warning">✏️</a>
+                                <a href="{% url 'catalog:product_update' product.pk %}"
+                                   class="btn btn-outline-warning btn-sm">✏️</a>
                                 {% endif %}
 
-                                <!-- Удаление для владельца ИЛИ модератора -->
                                 {% if user == product.owner or perms.catalog.delete_product %}
-                                <a href="{% url 'catalog:product_delete' product.pk %}" class="btn btn-danger">🗑</a>
+                                <a href="{% url 'catalog:product_delete' product.pk %}"
+                                   class="btn btn-outline-danger btn-sm">🗑</a>
                                 {% endif %}
+                            </div>
                             {% endif %}
                         </div>
                     </div>
+                </div>
+
+                <!-- Футер с датой -->
+                <div class="card-footer bg-transparent">
+                    <small class="text-muted">
+                        📅 {{ product.created_at|date:"d.m.Y" }}
+                    </small>
                 </div>
             </div>
         </div>
         {% empty %}
         <div class="col-12">
-            <div class="alert alert-info text-center">
-                Товары отсутствуют.
-                {% if user.is_authenticated %}
-                    <a href="{% url 'catalog:product_create' %}">Добавить первый товар</a>
-                {% else %}
-                    <a href="{% url 'users:login' %}">Войдите</a>, чтобы добавить товар
-                {% endif %}
+            <div class="alert alert-info text-center py-5">
+                <h4 class="mb-3">📭 Товары отсутствуют</h4>
+                <p class="lead">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'catalog:product_create' %}" class="btn btn-success btn-lg">
+                            ➕ Добавить первый товар
+                        </a>
+                    {% else %}
+                        <a href="{% url 'users:login' %}" class="btn btn-primary btn-lg">
+                            🔑 Войдите, чтобы добавить товар
+                        </a>
+                    {% endif %}
+                </p>
             </div>
         </div>
         {% endfor %}
     </div>
 
-    <!-- 🆕 Информационная панель о правах -->
+    <!-- Пагинация -->
+    {% if products.paginator.num_pages > 1 %}
+    <nav aria-label="Навигация по страницам" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if products.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1">&laquo; Первая</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ products.previous_page_number }}">← Назад</a>
+            </li>
+            {% endif %}
+
+            {% for num in products.paginator.page_range %}
+                {% if products.number == num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+                {% elif num > products.number|add:'-3' and num < products.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if products.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ products.next_page_number }}">Вперед →</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ products.paginator.num_pages }}">Последняя &raquo;</a>
+            </li>
+            {% endif %}
+        </ul>
+
+        <p class="text-center text-muted mt-2">
+            Страница {{ products.number }} из {{ products.paginator.num_pages }}
+        </p>
+    </nav>
+    {% endif %}
+
+    <!-- Информационная панель о правах -->
     {% if user.is_authenticated %}
-    <div class="row mt-4">
+    <div class="row mt-5">
         <div class="col-12">
             <div class="card border-info">
                 <div class="card-header bg-info text-white">
@@ -109,34 +202,52 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <h6>Создание продуктов:</h6>
+                            <h6>📝 Создание продуктов:</h6>
                             <ul class="list-unstyled">
                                 <li>✅ <strong>Все авторизованные пользователи</strong> могут создавать продукты</li>
                                 <li>✅ Продукт автоматически привязывается к вам как владельцу</li>
+                                <li>✅ Вы можете создавать неограниченное количество товаров</li>
                             </ul>
                         </div>
                         <div class="col-md-6">
-                            <h6>Редактирование и удаление:</h6>
+                            <h6>⚙️ Редактирование и удаление:</h6>
                             <ul class="list-unstyled">
                                 <li>✅ <strong>Владельцы</strong> могут редактировать и удалять свои продукты</li>
                                 <li>✅ <strong>Модераторы</strong> могут удалять любые продукты</li>
+                                <li>✅ <strong>Администраторы</strong> имеют полный доступ</li>
                                 <li>❌ <strong>Обычные пользователи</strong> не могут управлять чужими продуктами</li>
                             </ul>
                         </div>
                     </div>
 
-                    <!-- 🆕 Индикатор текущих прав -->
+                    <!-- Индикатор текущих прав -->
                     <div class="mt-3 p-3 bg-light rounded">
-                        <strong>Ваши текущие права:</strong>
+                        <strong>🎯 Ваши текущие права:</strong>
                         <div class="mt-2">
                             {% if user.is_authenticated %}
-                                <span class="badge bg-success">Создание продуктов</span>
+                                <span class="badge bg-success me-2">
+                                    ✅ Создание продуктов
+                                </span>
+                            {% endif %}
+                            {% if perms.catalog.change_product %}
+                                <span class="badge bg-warning me-2">
+                                    ✏️ Редактирование любых продуктов
+                                </span>
                             {% endif %}
                             {% if perms.catalog.delete_product %}
-                                <span class="badge bg-danger">Удаление любых продуктов</span>
+                                <span class="badge bg-danger me-2">
+                                    🗑 Удаление любых продуктов
+                                </span>
                             {% endif %}
-                            {% if perms.catalog.can_unpublish_product %}
-                                <span class="badge bg-warning">Управление публикацией</span>
+                            {% if perms.catalog.can_change_publish_status %}
+                                <span class="badge bg-info me-2">
+                                    🔄 Управление публикацией
+                                </span>
+                            {% endif %}
+                            {% if user.is_superuser %}
+                                <span class="badge bg-dark me-2">
+                                    ⭐️ Суперпользователь
+                                </span>
                             {% endif %}
                         </div>
                     </div>
@@ -146,4 +257,19 @@
     </div>
     {% endif %}
 </div>
+
+<style>
+.product-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid #e0e0e0;
+}
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+.card-img-overlay .badge {
+    font-size: 0.7rem;
+    opacity: 0.9;
+}
+</style>
 {% endblock %}
