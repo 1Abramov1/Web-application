@@ -1,0 +1,148 @@
+{% extends 'catalog/base.html' %}
+
+{% block title %}Категории товаров - Skystore{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Заголовок -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-5 fw-bold">📂 Категории товаров</h1>
+
+        {% if user.is_authenticated %}
+        <a href="{% url 'catalog:category_create' %}" class="btn btn-success">
+            ➕ Добавить категорию
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- Информация о кэше -->
+    {% if from_cache %}
+    <div class="alert alert-success alert-dismissible fade show mb-4">
+        ⚡️ Данные загружены из кэша
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+
+    <!-- Список категорий -->
+    {% if categories %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for category in categories %}
+            {% if category.slug %}  <!-- ← ДОБАВЬТЕ ЭТУ ПРОВЕРКУ! -->
+            <div class="col">
+                <div class="card h-100 shadow-sm category-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="card-title mb-0">{{ category.name }}</h5>
+                            <span class="badge bg-primary">
+                                {{ category.product_set.count }} товаров
+                            </span>
+                        </div>
+
+                        {% if category.description %}
+                        <p class="card-text text-muted">
+                            {{ category.description|truncatechars:100 }}
+                        </p>
+                        {% endif %}
+
+                        <div class="mt-3">
+                            <!-- Проверка slug перед генерацией URL -->
+                            {% if category.slug %}
+                            <a href="{% url 'catalog:category_products' slug=category.slug %}"
+                               class="btn btn-primary btn-sm">
+                                👁 Просмотреть товары
+                            </a>
+                            {% else %}
+                            <button class="btn btn-secondary btn-sm" disabled>
+                                ⚠️ Нет slug
+                            </button>
+                            {% endif %}
+
+                            {% if user.is_authenticated %}
+                            <div class="btn-group mt-2">
+                                {% if category.slug %}
+                                <a href="{% url 'catalog:category_update' slug=category.slug %}"
+                                   class="btn btn-outline-warning btn-sm">
+                                    ✏️ Редактировать
+                                </a>
+                                <a href="{% url 'catalog:category_delete' slug=category.slug %}"
+                                   class="btn btn-outline-danger btn-sm">
+                                    🗑 Удалить
+                                </a>
+                                {% else %}
+                                <button class="btn btn-outline-warning btn-sm" disabled>
+                                    ✏️ Нет slug
+                                </button>
+                                <button class="btn btn-outline-danger btn-sm" disabled>
+                                    🗑 Нет slug
+                                </button>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="card-footer bg-transparent">
+                        <small class="text-muted d-flex justify-content-between">
+                            <span>
+                                {% if category.slug %}
+                                URL: /category/{{ category.slug }}/
+                                {% else %}
+                                ⚠️ Отсутствует slug
+                                {% endif %}
+                            </span>
+                            {% if user.is_superuser %}
+                            <span>ID: {{ category.id }}</span>
+                            {% endif %}
+                        </small>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- Нет категорий -->
+    <div class="text-center py-5">
+        <div class="display-1 mb-4">📭</div>
+        <h3 class="mb-3">Категории не найдены</h3>
+        <p class="lead mb-4">Создайте первую категорию для организации товаров</p>
+
+        {% if user.is_authenticated %}
+        <a href="{% url 'catalog:category_create' %}" class="btn btn-success btn-lg">
+            ➕ Создать категорию
+        </a>
+        {% else %}
+        <a href="{% url 'users:login' %}" class="btn btn-primary btn-lg">
+            🔑 Войти для управления
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Навигация -->
+    <div class="mt-4 pt-3 border-top">
+        <div class="d-flex justify-content-between">
+            <a href="{% url 'catalog:product_list' %}" class="btn btn-outline-primary">
+                🛍 Все товары
+            </a>
+            <a href="{% url 'catalog:home' %}" class="btn btn-outline-secondary">
+                🏠 На главную
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.category-card {
+    transition: transform 0.2s;
+    border: 1px solid #e0e0e0;
+}
+.category-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+.category-card .card-footer {
+    background-color: rgba(0,0,0,0.02);
+}
+</style>
+{% endblock %}

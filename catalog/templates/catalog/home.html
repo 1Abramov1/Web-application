@@ -8,7 +8,7 @@
     <h1 class="display-4">Skystore</h1>
     <p class="lead">Skystore - это отличный вариант хранения ваших плагинов и примеров кода, который вы бы хотели
         продать</p>
-    <!-- 🆕 Кнопка добавления товара -->
+    <!--  Кнопка добавления товара -->
     <a href="{% url 'catalog:product_create' %}" class="btn btn-success btn-lg mt-3">➕ Добавить товар</a>
 </div>
 
@@ -40,7 +40,7 @@
                         </p>
                     </div>
 
-                    <!-- 🆕 Группа кнопок CRUD -->
+                    <!--  Группа кнопок CRUD -->
                     <div class="btn-group w-100 mt-auto" role="group">
                         <a href="{% url 'catalog:product_detail' product.pk %}" class="btn btn-primary">👁️ Подробнее</a>
                         <a href="{% url 'catalog:product_update' product.pk %}" class="btn btn-warning">✏️</a>
@@ -90,3 +90,32 @@
     </footer>
 </div>
 {% endblock %}
+<div class="row mt-5">
+    <div class="col-12">
+        <h3 class="mb-4">📂 Категории товаров</h3>
+        <div class="row">
+            {% for category in categories|slice:":6" %}
+            <div class="col-md-4 col-lg-2 mb-3">
+                <a href="{% url 'catalog:category_products' category.slug %}"
+                   class="card text-decoration-none text-center h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ category.name }}</h5>
+                        <span class="badge bg-primary">
+                            {{ category.product_set.count }} товаров
+                        </span>
+                    </div>
+                </a>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <p class="text-muted">Категории пока не добавлены</p>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-3">
+            <a href="{% url 'catalog:category_products_all' %}" class="btn btn-outline-primary">
+                Все категории →
+            </a>
+        </div>
+    </div>
+</div>

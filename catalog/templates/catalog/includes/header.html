@@ -14,21 +14,25 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'catalog:contacts' %}">📞 Контакты</a>
                 </li>
-                <!-- 🆕 Ссылка на блог -->
+                <!--  Ссылка на блог -->
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'blog:post_list' %}">📝 Блог</a>
                 </li>
-                <!-- 🆕 Ссылка на все товары -->
+                <!--  Ссылка на все товары -->
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'catalog:product_list' %}">🛍 Все товары</a>
                 </li>
-                <!-- 🆕 Ссылка на добавление товара -->
+                <!--  Ссылка на категории -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'catalog:category_products_all' %}">📂 Категории</a>
+                </li>
+                <!--  Ссылка на добавление товара -->
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'catalog:product_create' %}">➕ Добавить товар</a>
                 </li>
             </ul>
 
-            <!-- 🆕 Блок аутентификации -->
+            <!--  Блок аутентификации -->
             <ul class="navbar-nav ms-auto">
                 {% if user.is_authenticated %}
                 <li class="nav-item">
