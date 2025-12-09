@@ -1,0 +1,89 @@
+{% extends 'catalog/base.html' %}
+
+{% block title %}
+    {% if category %}
+        Редактирование: {{ category.name }}
+    {% else %}
+        Создание категории
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Хлебные крошки -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'catalog:home' %}">Главная</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'catalog:categories_list' %}">Категории</a></li>
+                    <li class="breadcrumb-item active">
+                        {% if category %}Редактирование{% else %}Создание{% endif %}
+                    </li>
+                </ol>
+            </nav>
+
+            <!-- Заголовок -->
+            <h1 class="mb-4">
+                {% if category %}
+                    ✏️ Редактирование категории
+                {% else %}
+                    ➕ Создание новой категории
+                {% endif %}
+            </h1>
+
+            <!-- Форма -->
+            <div class="card">
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <!-- Название -->
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Название категории *</label>
+                            <input type="text" class="form-control" id="name" name="name"
+                                   value="{{ category.name|default:'' }}" required
+                                   placeholder="Например: Электроника">
+                            <div class="form-text">Уникальное название категории</div>
+                        </div>
+
+                        <!-- Описание -->
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Описание</label>
+                            <textarea class="form-control" id="description" name="description"
+                                      rows="4" placeholder="Описание категории...">{{ category.description|default:'' }}</textarea>
+                        </div>
+
+                        <!-- Кнопки -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'catalog:categories_list' %}" class="btn btn-outline-secondary">
+                                ← Отмена
+                            </a>
+
+                            <button type="submit" class="btn btn-success">
+                                {% if category %}
+                                    💾 Сохранить изменения
+                                {% else %}
+                                    ✅ Создать категорию
+                                {% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Подсказки -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h6>💡 Подсказки:</h6>
+                    <ul class="mb-0">
+                        <li>Название должно быть уникальным</li>
+                        <li>Slug (URL-адрес) создается автоматически из названия</li>
+                        <li>Описание помогает покупателям найти нужные товары</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

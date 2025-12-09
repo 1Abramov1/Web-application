@@ -30,12 +30,10 @@
             <h1 class="display-5 fw-bold">{{ product.name }}</h1>
             {% if user.is_authenticated %}
             <div class="btn-group">
-                <!-- 🆕 Кнопка редактирования только для владельца -->
                 {% if user == product.owner %}
                 <a href="{% url 'catalog:product_update' product.pk %}" class="btn btn-warning btn-sm">✏️ Редактировать</a>
                 {% endif %}
 
-                <!-- 🆕 Кнопка удаления для владельца ИЛИ модератора -->
                 {% if user == product.owner or perms.catalog.delete_product %}
                 <a href="{% url 'catalog:product_delete' product.pk %}" class="btn btn-danger btn-sm">🗑 Удалить</a>
                 {% endif %}
@@ -43,18 +41,16 @@
             {% endif %}
         </div>
 
-        <!-- Статус публикации и информация о владельце -->
+        <!-- Статус публикации -->
         <div class="mb-3">
             <span class="badge {% if product.is_published %}bg-success{% else %}bg-secondary{% endif %} fs-6">
                 {% if product.is_published %}✅ Опубликован{% else %}🚫 Не опубликован{% endif %}
             </span>
 
-            <!-- 🆕 Информация о владельце -->
             {% if product.owner %}
             <span class="badge bg-info fs-6 ms-2">👤 Владелец: {{ product.owner.username }}</span>
             {% endif %}
 
-            <!-- 🆕 Показываем если текущий пользователь - владелец -->
             {% if user == product.owner %}
             <span class="badge bg-warning fs-6 ms-2">⭐️ Это ваш продукт</span>
             {% endif %}
@@ -79,13 +75,13 @@
                     <li><strong>Дата добавления:</strong> {{ product.created_at|date:"d.m.Y H:i" }}</li>
                     <li><strong>Последнее обновление:</strong> {{ product.updated_at|date:"d.m.Y H:i" }}</li>
                     <li><strong>Категория:</strong> {{ product.category.name|default:"Не указана" }}</li>
-                    <!-- 🆕 Информация о владельце в деталях -->
                     {% if product.owner %}
-                    <li><strong>Владелец:</strong> {{ product.owner.username }} ({{ product.owner.email }})</li>
+                    <li><strong>Владелец:</strong> {{ product.owner.username }}</li>
                     {% endif %}
                 </ul>
             </div>
         </div>
+
         <!-- Кнопки действий -->
         <div class="mt-4">
             <button class="btn btn-success btn-lg me-3">🛒 Добавить в корзину</button>
@@ -93,14 +89,13 @@
         </div>
     </div>
 </div>
-
-<!-- 🆕 БЛОК УПРАВЛЕНИЯ ПУБЛИКАЦИЕЙ ДЛЯ МОДЕРАТОРОВ -->
-{% if user.is_authenticated and perms.catalog.can_unpublish_product or perms.catalog.can_change_publish_status %}
+<!-- Управление публикацией для модераторов -->
+{% if user.is_authenticated and perms.catalog.can_change_publish_status %}
 <div class="row mt-4">
     <div class="col-12">
         <div class="card border-warning">
             <div class="card-header bg-warning text-dark">
-                <strong>🛠 Управление публикацией (Модератор)</strong>
+                <strong>🛠 Управление публикацией</strong>
             </div>
             <div class="card-body">
                 <div class="row align-items-center">
@@ -112,73 +107,12 @@
                     </div>
                     <div class="col-md-6">
                         <div class="btn-group w-100">
-                            {% if perms.catalog.can_unpublish_product and product.is_published %}
-                            <a href="{% url 'catalog:product_unpublish' product.pk %}" class="btn btn-outline-danger">
-                                🚫 Снять с публикации
-                            </a>
-                            {% endif %}
-
-                            {% if perms.catalog.can_change_publish_status and not product.is_published %}
-                            <a href="{% url 'catalog:product_publish' product.pk %}" class="btn btn-outline-success">
-                                ✅ Опубликовать
-                            </a>
-                            {% endif %}
-
-                            {% if perms.catalog.can_change_publish_status %}
                             <a href="{% url 'catalog:product_toggle_publish' product.pk %}" class="btn btn-outline-primary">
                                 🔄 Переключить статус
                             </a>
-                            {% endif %}
                         </div>
                     </div>
                 </div>
-
-                <!-- Информация о правах пользователя -->
-                <div class="mt-2">
-                    <small class="text-muted">
-                        Ваши права:
-                        {% if perms.catalog.can_unpublish_product %}<span class="badge bg-info">Отмена публикации</span>{% endif %}
-                        {% if perms.catalog.can_change_publish_status %}<span class="badge bg-info">Изменение статуса</span>{% endif %}
-                        {% if perms.catalog.delete_product %}<span class="badge bg-info">Удаление</span>{% endif %}
-                    </small>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-{% endif %}
-
-<!-- 🆕 БЛОК ДЛЯ ВЛАДЕЛЬЦЕВ ПРОДУКТОВ -->
-{% if user.is_authenticated and user == product.owner %}
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="card border-success">
-            <div class="card-header bg-success text-white">
-                <strong>⭐️ Управление вашим продуктом</strong>
-            </div>
-            <div class="card-body">
-                <p class="mb-3">Вы являетесь владельцем этого продукта. Вы можете редактировать и удалять его.</p>
-                <div class="btn-group">
-                    <a href="{% url 'catalog:product_update' product.pk %}" class="btn btn-warning">✏️ Редактировать продукт</a>
-                    <a href="{% url 'catalog:product_delete' product.pk %}" class="btn btn-danger">🗑 Удалить продукт</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-{% endif %}
-
-<!-- БЛОК ДЛЯ ОБЫЧНЫХ АВТОРИЗОВАННЫХ ПОЛЬЗОВАТЕЛЕЙ -->
-{% if user.is_authenticated and user != product.owner and not perms.catalog.can_unpublish_product and not perms.catalog.can_change_publish_status %}
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="card border-info">
-            <div class="card-header bg-info text-white">
-                <strong>👤 Ваши права</strong>
-            </div>
-            <div class="card-body">
-                <p class="mb-0">Вы можете создавать свои продукты, но не можете редактировать или удалять чужие.</p>
-                <a href="{% url 'catalog:product_create' %}" class="btn btn-primary mt-2">➕ Создать свой продукт</a>
             </div>
         </div>
     </div>
